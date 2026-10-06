@@ -1,0 +1,74 @@
+/* Layout: single column, max 28rem, sticky header, fixed action bar at the bottom.
+   Letter groups (a–j, clinical) and number groups (1–5, auditorium/lab) get their own hue. */
+:root {
+  --bg: #f7f8f6;
+  --surface: #ffffff;
+  --fg: #171d22;
+  --muted: #5d6871;
+  --line: #dfe4e2;
+  --accent: #0f766e;
+  --accent-fg: #ffffff;
+  --accent-soft: #d9f0ec;
+  --letter: #4338ca;
+  --letter-soft: #e4e3fb;
+  --number: #0e7490;
+  --number-soft: #d8eef4;
+  --danger: #c2410c;
+  --danger-soft: #fdebe1;
+  --font-display: 'Manrope', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #121719;
+    --surface: #1b2225;
+    --fg: #eef2f1;
+    --muted: #97a3a8;
+    --line: #2b3539;
+    --accent: #2dd4bf;
+    --accent-fg: #06201d;
+    --accent-soft: #163a37;
+    --letter: #a5b4fc;
+    --letter-soft: #26284a;
+    --number: #67e8f9;
+    --number-soft: #163844;
+    --danger: #fb923c;
+    --danger-soft: #3b2214;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #121719;
+  --surface: #1b2225;
+  --fg: #eef2f1;
+  --muted: #97a3a8;
+  --line: #2b3539;
+  --accent: #2dd4bf;
+  --accent-fg: #06201d;
+  --accent-soft: #163a37;
+  --letter: #a5b4fc;
+  --letter-soft: #26284a;
+  --number: #67e8f9;
+  --number-soft: #163844;
+  --danger: #fb923c;
+  --danger-soft: #3b2214;
+  color-scheme: dark;
+}
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
