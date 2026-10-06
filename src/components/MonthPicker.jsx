@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useBackButton } from '../lib/native.js';
 import { monthGrid, formatMonthYear, addMonths, fromISODate } from '../lib/dates.js';
 
 const WEEKDAY_HEADERS = ['pn', 'wt', 'śr', 'cz', 'pt', 'so', 'nd'];
@@ -10,6 +11,7 @@ const WEEKDAY_HEADERS = ['pn', 'wt', 'śr', 'cz', 'pt', 'so', 'nd'];
 export function MonthPicker({ selected, today, datesWithClasses, onSelect, onClose }) {
   const [month, setMonth] = useState(selected);
   const cells = monthGrid(month);
+  useBackButton(onClose);
 
   useEffect(() => {
     function onKey(e) {

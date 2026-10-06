@@ -7,6 +7,7 @@ const KEYS = {
   source: 'plan.source', // 'bundled' | 'upload'
   fileName: 'plan.fileName',
   selections: 'plan.selections',
+  installBannerDismissed: 'plan.installBannerDismissed',
 };
 
 function read(key) {
@@ -55,6 +56,14 @@ export function loadSelections() {
 
 export function saveSelections(selections) {
   write(KEYS.selections, JSON.stringify(selections));
+}
+
+export function loadInstallBannerDismissed() {
+  return read(KEYS.installBannerDismissed) === '1';
+}
+
+export function saveInstallBannerDismissed() {
+  write(KEYS.installBannerDismissed, '1');
 }
 
 export function clearAll() {

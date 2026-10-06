@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { WeekStrip } from './WeekStrip.jsx';
 import { MonthPicker } from './MonthPicker.jsx';
 import { DayList } from './DayList.jsx';
+import { InstallBanner, InstallSheet, shouldOfferInstall, isPhone } from './InstallHint.jsx';
+import { loadInstallBannerDismissed, saveInstallBannerDismissed } from '../lib/storage.js';
 import { todayISO, minutesNow, relativeDayLabel, formatDayMonth, formatWeekdayLong } from '../lib/dates.js';
 
 /**
@@ -12,6 +14,10 @@ export function DailyView({ entries, planTitle, onOpenSettings }) {
   const [today, setToday] = useState(todayISO);
   const [nowMinutes, setNowMinutes] = useState(minutesNow);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [installOpen, setInstallOpen] = useState(false);
+  const [showInstallBanner, setShowInstallBanner] = useState(
+    () => shouldOfferInstall() && isPhone() && !loadInstallBannerDismissed(),
+  );
 
   const byDate = useMemo(() => {
     const map = new Map();
@@ -100,6 +106,15 @@ export function DailyView({ entries, planTitle, onOpenSettings }) {
       </header>
 
       <main key={selected} className="mx-auto w-full max-w-md flex-1 pt-3">
+        {showInstallBanner ? (
+          <InstallBanner
+            onOpen={() => setInstallOpen(true)}
+            onDismiss={() => {
+              saveInstallBannerDismissed();
+              setShowInstallBanner(false);
+            }}
+          />
+        ) : null}
         <DayList
           entries={dayEntries}
           isToday={selected === today}
@@ -120,6 +135,8 @@ export function DailyView({ entries, planTitle, onOpenSettings }) {
           onClose={() => setPickerOpen(false)}
         />
       ) : null}
+
+      {installOpen ? <InstallSheet onClose={() => setInstallOpen(false)} /> : null}
     </div>
   );
 }

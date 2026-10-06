@@ -6,6 +6,7 @@ import { FileImport } from './components/FileImport.jsx';
 import { GroupSelection } from './components/GroupSelection.jsx';
 import { DailyView } from './components/DailyView.jsx';
 import { SettingsScreen } from './components/SettingsScreen.jsx';
+import { useBackButton } from './lib/native.js';
 
 const bundledParsed = parseSchedule(BUNDLED_CSV);
 const bundled = {
@@ -39,6 +40,9 @@ function restore() {
 export default function App() {
   const [state, setState] = useState(restore);
   const { screen, schedule, selections } = state;
+
+  // Android back button on the settings screen returns to the schedule.
+  useBackButton(() => setState((s) => ({ ...s, screen: 'ready' })), screen === 'settings');
 
   useEffect(() => {
     if (schedule) saveSelections(selections);

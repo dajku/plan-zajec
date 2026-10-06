@@ -1,0 +1,8 @@
+{
+  "appId": "io.github.dajku.planzajec",
+  "appName": "Plan zajęć",
+  "webDir": "dist",
+  "android": {
+    "backgroundColor": "#f7f8f6"
+  }
+}
