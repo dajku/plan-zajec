@@ -4,12 +4,16 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 // BASE_PATH is "/<repo>/" on GitHub project pages and "/" everywhere else.
 const base = process.env.BASE_PATH || '/';
+// CAPACITOR=1 builds the copy packaged into the Android app: files load from
+// the APK itself, so no service worker.
+const native = process.env.CAPACITOR === '1';
 
 export default defineConfig({
   base,
   plugins: [
     react(),
     VitePWA({
+      disable: native,
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png'],
       manifest: {

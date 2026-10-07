@@ -28,3 +28,23 @@ npm run verify -- "<plik>.csv"                # parser assertions against the re
 - `public/icons/` holds the app icons; regenerate the PNGs with `npm run icons` (needs Chromium; set `CHROMIUM_PATH` to reuse an installed one).
 - `src/components/InstallHint.jsx` shows the install button (Android/desktop Chrome) or the Safari steps (iPhone) on the settings screen.
 - `.github/workflows/deploy.yml` builds on every push to `main` and publishes `dist/` to GitHub Pages. The base path is derived from the repository name, so a project repo is served at `https://<owner>.github.io/<repo>/`.
+
+## Android app (APK)
+
+The same code is wrapped with [Capacitor](https://capacitorjs.com) into an Android app (`android/`). Every push to `main` builds `plan-zajec.apk` and publishes it next to the site, at `<site>/plan-zajec.apk`; the install card in the app links to it. Pull requests attach the APK to the workflow run.
+
+- `npm run build:android` builds the web copy without the service worker and syncs it into `android/`.
+- `npm run android-assets` regenerates the launcher icons and splash screens from `public/icons/icon.svg`.
+
+Signing: by default each CI build is signed with a throwaway debug key, so a new APK only installs after the old one is uninstalled. To let updates install over each other, create a key once and add three repository secrets (Settings → Secrets and variables → Actions):
+
+```sh
+keytool -genkeypair -keystore release.keystore -alias planzajec -keyalg RSA -keysize 2048 -validity 10000
+base64 -w0 release.keystore   # on macOS: base64 -i release.keystore
+```
+
+- `ANDROID_KEYSTORE_BASE64`: the base64 output
+- `ANDROID_KEYSTORE_PASSWORD`: the password you chose
+- `ANDROID_KEY_ALIAS`: `planzajec`
+
+Keep `release.keystore` and its password somewhere safe and out of the repo.

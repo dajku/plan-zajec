@@ -1,8 +1,12 @@
-name: Deploy to GitHub Pages
+name: Build and deploy
 
+# Every push to main builds the Android APK, puts it next to the website and
+# deploys both to GitHub Pages. Pull requests build the same things without
+# deploying; the APK is attached to the run for testing.
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -11,7 +15,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -23,7 +27,37 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
       - run: npm ci
+      - run: npm run verify -- data/plan.csv
+
+      - name: Build the web copy for the Android app
+        run: npm run build:android
+      - name: Unpack the release signing key
+        # Optional: without these secrets the APK is signed with a throwaway key
+        # (installs fine, but each new build needs the old one uninstalled first).
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        if: env.KEYSTORE_BASE64 != ''
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
+      - name: Build the APK
+        working-directory: android
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: ./gradlew assembleRelease --no-daemon
+      - run: cp android/app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/plan-zajec.apk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plan-zajec-apk
+          path: ${{ runner.temp }}/plan-zajec.apk
+
       - name: Work out the Pages base path
         # user/organization sites (owner.github.io) are served from "/", project sites from "/<repo>/"
         run: |
@@ -32,17 +66,20 @@ jobs:
           else
             echo "BASE_PATH=/${{ github.event.repository.name }}/" >> "$GITHUB_ENV"
           fi
-      - run: npm run verify -- data/plan.csv
       - run: npm run build
+      - run: cp "$RUNNER_TEMP/plan-zajec.apk" dist/plan-zajec.apk
       - uses: actions/configure-pages@v5
+        if: github.event_name != 'pull_request'
         with:
           enablement: true
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
         with:
           path: dist
 
   deploy:
     needs: build
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
